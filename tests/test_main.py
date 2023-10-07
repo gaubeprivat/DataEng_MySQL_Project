@@ -1,7 +1,7 @@
 """
 Modul: test_main
 Author: Benjamin Gaube
-Date: 2023-07-24
+Date: 2023-10-07
 
 Info:
         Just a short showcase to demonstrate awareness of testdriven development.
@@ -16,7 +16,7 @@ import tempfile
 
 from src.main import unzip_data, unzip_it, FILENAME
 
-directory = r'C:\Dateien Benjamin\playground\Python\data\projekt02'  # TODO: r'C:\Users\User\Downloads'
+directory = r'C:\Users\User\Downloads'
 path = os.path.join(directory, FILENAME + '.zip')
 
 
@@ -30,7 +30,7 @@ class TestModule(unittest.TestCase):
             self.assertIn('StudentGrades.txt', content)
 
     def test_unpacking_inner(self):
-        def test_it(path_to):
+        def test_it(path_to: str):
             content = os.listdir(os.path.join(path_to, 'Data'))
             self.assertIn('S1', content)
             self.assertIn('S5', content)
