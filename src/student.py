@@ -11,6 +11,8 @@ import os
 import re
 from typing import Dict  # List, Tuple, Any, Callable
 
+from src.event_series import InterBeatInterval
+
 
 class Student:
     """
@@ -22,6 +24,23 @@ class Student:
         self.path = os.path.join(temp_path, student_id)
         self.student_id = student_id
         self.grades = grades
+        self._ibi = None
+
+    @property
+    def ibi(self):
+        return self._ibi
+
+    @ibi.setter
+    def ibi(self, temp_dir):
+
+        check_content = ['Final', 'Midterm 1', 'Midterm 2']
+
+        for entry in check_content:
+            if entry not in os.listdir(temp_dir):
+                raise FileNotFoundError(f'Missing {entry} folder in {temp_dir}')
+
+        # initialize object
+        self._ibi = InterBeatInterval(temp_dir)
 
     @staticmethod
     def extract_grades(file_path: str) -> Dict[str, Dict[str, int]]:
