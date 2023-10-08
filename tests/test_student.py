@@ -8,9 +8,12 @@ import os
 import unittest
 from typing import Tuple
 
-from src.main import FILENAME
+import pandas as pd
+
 from test_main import TestModul
+from src.main import FILENAME
 from src.student import Student
+from src.event_series import InterBeatInterval
 
 
 class TestStaticmethod(TestModul):
@@ -57,6 +60,15 @@ class TestStudentModul(TestModul):
 
         some_other_student = Student(self.students_directory, 'S7', TestStudentModul.personal_grades('S7'))
         self.assertEqual(some_other_student.grades[1], 33)
+
+    def test_getter_setter(self):
+        # NOTE: the constructor of event_series should work correctly.
+        # Check "test_constructor" in "test_event_series.py"
+
+        some_student = Student(self.students_directory, 'S1', TestStudentModul.personal_grades('S1'))
+        some_student.ibi = os.path.join(self.unpacked_directory, 'Data', some_student.student_id)
+        self.assertIsInstance(some_student.ibi, InterBeatInterval)
+        self.assertIsInstance(some_student.ibi.final, pd.DataFrame)
 
 
 if __name__ == '__main__':

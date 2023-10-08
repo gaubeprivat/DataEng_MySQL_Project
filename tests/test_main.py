@@ -7,7 +7,7 @@ Info:
     Just a short showcase to demonstrate awareness of testdriven development.
     There will be no full test-coverage for this project.
 
-    For usage please hardcode the [main_zip_path] with the directory were ur zip-file is located.
+    For usage please hardcode the [main_zip_path] in class TestModul with the directory were ur zip-file is located.
 """
 
 import os
