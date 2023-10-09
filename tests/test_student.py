@@ -63,12 +63,17 @@ class TestStudentModul(TestModul):
 
     def test_getter_setter(self):
         # NOTE: the constructor of event_series should work correctly.
-        # Check "test_constructor" in "test_event_series.py"
+        # Check 'test_constructor' in 'test_event_series.py'
 
         some_student = Student(self.students_directory, 'S1', TestStudentModul.personal_grades('S1'))
         some_student.ibi = os.path.join(self.unpacked_directory, 'Data', some_student.student_id)
         self.assertIsInstance(some_student.ibi, InterBeatInterval)
         self.assertIsInstance(some_student.ibi.final, pd.DataFrame)
+
+        # Note: For this test also 'test__reformat_file' should be OK
+        df = some_student.ibi.final
+        self.assertIsInstance(df.time[0], float)
+        self.assertEqual(df.interval[1], 500)
 
 
 if __name__ == '__main__':
