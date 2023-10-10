@@ -14,7 +14,6 @@ from contextlib import contextmanager
 import mysql.connector
 from mysql.connector.connection import MySQLConnection
 
-
 @contextmanager
 def connect_to_localhost(database=None):
     """
@@ -94,6 +93,19 @@ def create_schema(schema_name: str):
         ''')
 
         cursor.execute('''
+        CREATE TABLE inter_beat_interval (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id INT, 
+            term_id INT,
+            ibi_value_id INT,
+            ib_value FLOAT,
+            timestamp INT,
+            FOREIGN KEY (student_id) REFERENCES dataset(id) ON DELETE CASCADE,
+            FOREIGN KEY (term_id) REFERENCES exam(id)
+        )
+        ''')
+
+        cursor.execute('''
         CREATE TABLE master_data (
             id INT AUTO_INCREMENT PRIMARY KEY,
             student_id INT,
@@ -114,8 +126,8 @@ def create_schema(schema_name: str):
             term_id INT,
             parameter_id INT,
             parameter VARCHAR(15),
-            value_id INT,
-            value FLOAT,
+            hrv_value_id INT,
+            hrv_value FLOAT,
             timestamp INT,
             FOREIGN KEY (student_id) REFERENCES dataset(id) ON DELETE CASCADE,
             FOREIGN KEY (term_id) REFERENCES exam(id),
@@ -127,4 +139,4 @@ def create_schema(schema_name: str):
 
 
 if __name__ == '__main__':
-    create_schema('application_project_gaube')
+    create_schema('application_project_gaube')  # hardcoded
