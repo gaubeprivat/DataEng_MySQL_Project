@@ -187,7 +187,6 @@ def process_data(temp_dir):
 
 
 
-
             print('!!!  OK   !!!')
 
             # TODO create inter_beat_interval table
