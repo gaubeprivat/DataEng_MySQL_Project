@@ -1,5 +1,5 @@
 """
-Modul: ibi
+Modul: event_series
 Author: Benjamin Gaube
 Date: 2023-10-08
 
@@ -84,5 +84,6 @@ class InterBeatInterval:
         ibi_df.time = ibi_df.time.shift(+1)
         ibi_df.time[0] = ibi_df.time[1] - ibi_df.interval[0]
         ibi_df.interval = (ibi_df.interval * 1000).astype(int)
+        ibi_df.time = ibi_df.time.astype(int)
 
         return ibi_df

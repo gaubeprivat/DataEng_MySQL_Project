@@ -76,7 +76,7 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
                 func(os.path.join(temp_dir))
 
         except FileNotFoundError:
-            raise  # TODO: delet
+            raise  # TODO: delete
             print(f'invalid path given: {main_zip_path}. Code has not executed.')
 
 
@@ -121,7 +121,21 @@ def process_data(temp_dir):
 
     """
 
-    #TODO
+    def _store_ibi(dataset_id, term_name, term_index, ibi_obj):
+        """
+        Private function stores the inter beat intervals depending on the exam into db
+        """
+
+        # TODO: Speed up with sqlalchemie and pandas df.to_sql()
+        df = getattr(ibi_obj, term_name)
+        for value_id, row in df.iterrows():
+            cursor.execute(
+                'INSERT INTO inter_beat_interval (student_id, term_id, ibi_value_id, ibi_value, timestamp) '
+                'VALUES (%s, %s, %s, %s, %s)', (dataset_id, term_index,  value_id+1, int(row[0]), int(row[1]))
+            )
+        db.commit()
+
+    # TODO
     expected_iterations = generator_length(temp_dir)
     start_dt = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     start_t = timeit.default_timer()
@@ -161,15 +175,23 @@ def process_data(temp_dir):
                     last_id = cursor.fetchone()[0]
                 else:
                     raise
-                    # TODO: maybe outer try - except statment --> write log and continue with next student
+                    # TODO: maybe outer try - except statement --> write log and continue with next student
 
-            # TODO write exam table
+            # set ibi object for student
+            stud.ibi = stud.path
 
-            # TODO write parameter table
+            # store ibi data into db
+            for term_id, term in enumerate(['mid1', 'mid2', 'final'], start=1):
+                _store_ibi(last_id, term, term_id, stud.ibi)
 
-            # TODO use setter for ibi obj
+
+
+
+
+            print('!!!  OK   !!!')
+
             # TODO create inter_beat_interval table
-            # TODO calculate sdnn, mean_nn
+            # TODO calculate sdnn, mean_nnS
 
             # TODO create master_data table
 

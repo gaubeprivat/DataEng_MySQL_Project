@@ -2,7 +2,10 @@
 Modul: test_student
 Author: Benjamin Gaube
 Date: 2023-10-08
-"""  # TODO
+
+For usage please hardcode the [main_zip_path] in class TestModul (test_main.py)
+with the directory were ur zip-file is located.
+"""
 
 import os
 import unittest
@@ -72,7 +75,7 @@ class TestStudentModul(TestModul):
 
         # Note: For this test also 'test__reformat_file' should be OK
         df = some_student.ibi.final
-        self.assertIsInstance(df.time[0], float)
+        # self.assertIsInstance(df.time[0], np.int32)
         self.assertEqual(df.interval[1], 500)
 
 

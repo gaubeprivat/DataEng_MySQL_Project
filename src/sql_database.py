@@ -12,7 +12,7 @@ from time import sleep
 from contextlib import contextmanager
 
 import mysql.connector
-from mysql.connector.connection import MySQLConnection
+
 
 @contextmanager
 def connect_to_localhost(database=None):
@@ -98,7 +98,7 @@ def create_schema(schema_name: str):
             student_id INT, 
             term_id INT,
             ibi_value_id INT,
-            ib_value FLOAT,
+            ibi_value INT,
             timestamp INT,
             FOREIGN KEY (student_id) REFERENCES dataset(id) ON DELETE CASCADE,
             FOREIGN KEY (term_id) REFERENCES exam(id)
@@ -134,6 +134,12 @@ def create_schema(schema_name: str):
             FOREIGN KEY (parameter_id) REFERENCES hrv(id)
         )
         ''')
+
+        for term_type in ['mid1', 'mid2', 'final']:
+            cursor.execute('INSERT INTO exam (term) VALUES (%s)', (term_type,))
+
+        for parameter_type in ['nni_mean', 'sdnn']:
+            cursor.execute('INSERT INTO hrv (parameter) VALUES (%s)', (parameter_type,))
 
         db.commit()
 

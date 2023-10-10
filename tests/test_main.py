@@ -4,7 +4,7 @@ Author: Benjamin Gaube
 Date: 2023-10-08
 
 Info:
-    Just a short showcase to demonstrate awareness of testdriven development.
+    These tests primarily are a showcase to demonstrate awareness of testdriven development.
     There will be no full test-coverage for this project.
 
     For usage please hardcode the [main_zip_path] in class TestModul with the directory were ur zip-file is located.
@@ -70,7 +70,7 @@ class TestMainModul(TestModul):
     def test_student_factory(self):  # tests for class Student in test_student.py
         students_list = []
         students_list_validate = ['S1', 'S3', 'S5', 'S7', 'S10']
-        for stud in student_factory(os.path.join(self.unpacked_directory)):
+        for stud in student_factory(os.path.join(self.unpacked_directory)):  # self.unpacked_directory
             students_list.append(stud.student_id)
 
         for stud in students_list_validate:
