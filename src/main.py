@@ -5,14 +5,26 @@
 
 """ # TODO
 
+
 import os
 import zipfile
 import tempfile
+import datetime as dt
+import timeit
 from typing import Generator
 
-from src.student import Student
+import mysql.connector
 
+from src.student import Student
+from src.sql_database import create_schema, connect_to_localhost
+
+directory = r'C:\tests'
+schema = 'application_project_gaube'
 FILENAME = r'a-wearable-exam-stress-dataset-for-predicting-cognitive-performance-in-real-world-settings-1.0.0'
+
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def unzip_it(zip_path: str, extract_to: str) -> None:
@@ -64,8 +76,8 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
                 func(os.path.join(temp_dir))
 
         except FileNotFoundError:
-            raise  # TODO: entfernen
-            print(f'invalid path given: {main_zip_path}')
+            raise  # TODO: delet
+            print(f'invalid path given: {main_zip_path}. Code has not executed.')
 
 
 def generator_length(temp_dir: str) -> int:
@@ -81,14 +93,10 @@ def student_factory(temp_dir: str) -> Generator[Student, None, None]:
 
     :param temp_dir: str, The path to the temporary directory containing the data.
     :yield: Student, Yields Student objects.
-    :example:
-        >>> student_gen = student_factory('path/to/temp_dir')
-        >>> next(student_gen)
-        <Student object at 0x...>
     """
 
     students_list = os.listdir(os.path.join(temp_dir, 'Data'))
-    students_grades = Student.extract_grades(os.path.join(temp_dir, 'StudentGrades.txt'))
+    students_grades = Student.extract_grades(os.path.join(temp_dir, FILENAME, 'StudentGrades.txt'))
     term_keys = [key for key in students_grades]
 
     for student_id in students_list:
@@ -102,33 +110,82 @@ def student_factory(temp_dir: str) -> Generator[Student, None, None]:
         yield Student(os.path.join(temp_dir, 'Data'), student_id, tuple(grades))
 
 
-
 def write_into_db():
     pass  # maybe a function to store information into db
 
 
-def calculate_hrv(temp_dir):
-    # give status message --> call generator_length()
-    # call Student.get_grades() to get a dictionary of all grades
-    # the grades have to passed to the student object.. how? further function?
+def process_data(temp_dir):
+    """
 
-   for stud in student_factory(temp_dir):
-        pass
-        # connect to database
+    .........calculate hrv for each student and store the values along with grades into db
 
-        # use Student-information to calculate hrv
-        # use write_into_db() to store the new calculated parameters into db
+    """
 
+    #TODO
+    expected_iterations = generator_length(temp_dir)
+    start_dt = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    start_t = timeit.default_timer()
+    error_count = 0
 
+    gen = student_factory(temp_dir)
 
+    for i, stud in enumerate(gen):
+
+        clear()
+        print(f'Calculation of {expected_iterations} datasets started: {start_dt}')
+        print(f'Actually in the {i + 1} run. Processing data of student: {stud.student_id}')
+        print(f'Calculation to {round(i / expected_iterations * 100, 2)}% completed.')
+        time_per_ds = 'unknown' if i < 2 else (timeit.default_timer() - start_t) / i
+        if i >= 2:
+            print(f'predicted tim: {round((time_per_ds * (expected_iterations - i)) / 3600, 2)}h')
+        print(f'{error_count} errors occurred')
+        
+        # open database connection with context manager
+        with connect_to_localhost(schema) as db:
+            cursor = db.cursor()
+
+            try:
+                # if the student doesn't exist: write it into db
+                cursor.execute('INSERT INTO dataset (student) VALUES (%s)', (stud.student_id,))
+                cursor.execute('SELECT LAST_INSERT_ID()')
+                last_id = cursor.fetchone()[0]
+            except mysql.connector.IntegrityError as e:
+                # if the student already in db: delete old entry, write..
+                if 'Duplicate entry' in str(e):
+                    print(f'Duplicate entry {stud.student_id} for key student detected. Deleting...')
+                    cursor.execute(f"DELETE FROM dataset WHERE student = '{stud.student_id}'")
+                    db.commit()
+                    cursor.execute('INSERT INTO dataset (student) VALUES (%s, %s)', (stud.student_id,))
+
+                    cursor.execute('SELECT LAST_INSERT_ID()')
+                    last_id = cursor.fetchone()[0]
+                else:
+                    raise
+                    # TODO: maybe outer try - except statment --> write log and continue with next student
+
+            # TODO write exam table
+
+            # TODO write parameter table
+
+            # TODO use setter for ibi obj
+            # TODO create inter_beat_interval table
+            # TODO calculate sdnn, mean_nn
+
+            # TODO create master_data table
+
+            # TODO use static funtion-generator to yield moving window in for-loop
+                # TODO calculate sdnn and mean_nn
+                # TODO write window_values table
+
+            db.commit()  # NOTE: LAST LINE OF CODE
 
 
 if __name__ == '__main__':
 
-    path = os.path.join(r'C:\Dateien Benjamin\playground\Python\data\projekt02', FILENAME+'.zip')
-    # path = input()# TODO input path
+    # directory = input()
+    path = os.path.join(directory, FILENAME+'.zip')
 
-    # TODO call create_schema.py
-    unzip_data(path, calculate_hrv)
+    create_schema(schema)
+    unzip_data(path, process_data)
 
 
