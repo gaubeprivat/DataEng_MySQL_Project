@@ -1,9 +1,39 @@
 """
+Main Module of Package application_project
+-------------------------------------------
+
+This module serves as the main integration and orchestration point for processing
+student data and physiological signals during various exams, given by:
+
+a-wearable-exam-stress-dataset-for-predicting-cognitive-performance-in-real-world-settings-1.0.0.zip
+
+It utilizes functionalities defined in complementary modules within the package to
+extract data, calculate Heart Rate Variability (HRV) parameters for all students and
+all exams, and store them alongside student information in a SQL database, which was
+developed for this purpose.
 
 
+Main Functions:
+- `unzip_data()`: Extracts data of the zip-file into temporary directory
+- `student_factory()`: Generator providing student-objects
+- `calculate_hrv()`: simple hrv-calculations (mean_nni and sdnn)
+- `process_data()`: Use the in this package provided functionality to process the data
+                    and store them into the database
+
+Usage:
+
+xamp, link data, pfad hardcoden
 
 
-""" # TODO
+Contained Modules:
+- `student.py`: Provides a student-object with all necessary information.
+- `event_series.py`: Provides a further object which is used as attribute of Student
+- `sql_database.py`: Provides the schema of the developed database and a contextmanager
+                     for the connection to localhost.
+
+:Author: Benjamin Gaube
+:Date: 2023-10-10
+"""  # TODO Usage
 
 
 import os
@@ -11,14 +41,16 @@ import zipfile
 import tempfile
 import datetime as dt
 import timeit
-from typing import Generator
+from typing import Generator, Tuple
 
 import mysql.connector
+import numpy as np
 
 from src.student import Student
 from src.sql_database import create_schema, connect_to_localhost
+from src.event_series import InterBeatInterval
 
-directory = r'C:\tests'
+directory = r'C:\tests'  # TODO
 schema = 'application_project_gaube'
 FILENAME = r'a-wearable-exam-stress-dataset-for-predicting-cognitive-performance-in-real-world-settings-1.0.0'
 
@@ -76,7 +108,6 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
                 func(os.path.join(temp_dir))
 
         except FileNotFoundError:
-            raise  # TODO: delete
             print(f'invalid path given: {main_zip_path}. Code has not executed.')
 
 
@@ -110,8 +141,20 @@ def student_factory(temp_dir: str) -> Generator[Student, None, None]:
         yield Student(os.path.join(temp_dir, 'Data'), student_id, tuple(grades))
 
 
-def write_into_db():
-    pass  # maybe a function to store information into db
+def calculate_hrv(hrv_array: np.array) -> Tuple[float, float]:
+    """
+    Calculate the simple HRV parameters: nni_mean and SDNN.
+
+    More complex time-domain parameters like RMSSD and SDANN do not make sense with
+    this data because several inter-beat intervals are missing. Thus, there are
+    numerous interruptions in the event series, making it not persistent.
+    Consequently, it does not make sense to apply a Fourier transformation to
+    calculate frequency-based parameters (e.g., High Frequency - Low Frequency Ratio).
+    Furthermore, evaluating persistence with Detrended Fluctuation Analysis or other
+    nonlinear methods will not lead to consistent data.
+    """
+
+    return np.mean(hrv_array).round(2), np.std(hrv_array, ddof=0).round(2)
 
 
 def process_data(temp_dir):
@@ -121,25 +164,12 @@ def process_data(temp_dir):
 
     """
 
-    def _store_ibi(dataset_id, term_name, term_index, ibi_obj):
-        """
-        Private function stores the inter beat intervals depending on the exam into db
-        """
-
-        # TODO: Speed up with sqlalchemie and pandas df.to_sql()
-        df = getattr(ibi_obj, term_name)
-        for value_id, row in df.iterrows():
-            cursor.execute(
-                'INSERT INTO inter_beat_interval (student_id, term_id, ibi_value_id, ibi_value, timestamp) '
-                'VALUES (%s, %s, %s, %s, %s)', (dataset_id, term_index,  value_id+1, int(row[0]), int(row[1]))
-            )
-        db.commit()
-
     # TODO
     expected_iterations = generator_length(temp_dir)
     start_dt = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     start_t = timeit.default_timer()
     error_count = 0
+    terms = ['mid1', 'mid2', 'final']
 
     gen = student_factory(temp_dir)
 
@@ -151,7 +181,7 @@ def process_data(temp_dir):
         print(f'Calculation to {round(i / expected_iterations * 100, 2)}% completed.')
         time_per_ds = 'unknown' if i < 2 else (timeit.default_timer() - start_t) / i
         if i >= 2:
-            print(f'predicted tim: {round((time_per_ds * (expected_iterations - i)) / 3600, 2)}h')
+            print(f'predicted tim: {round((time_per_ds * (expected_iterations - i)) / 60, 2)} min') # TODO output doesent make sense for now
         print(f'{error_count} errors occurred')
         
         # open database connection with context manager
@@ -174,31 +204,51 @@ def process_data(temp_dir):
                     cursor.execute('SELECT LAST_INSERT_ID()')
                     last_id = cursor.fetchone()[0]
                 else:
-                    raise
+                    raise  # TODO Some Error here...
                     # TODO: maybe outer try - except statement --> write log and continue with next student
 
             # set ibi object for student
             stud.ibi = stud.path
 
-            # store ibi data into db
-            for term_id, term in enumerate(['mid1', 'mid2', 'final'], start=1):
-                _store_ibi(last_id, term, term_id, stud.ibi)
+            # process data and store it into db
+            for j, term in enumerate(terms, start=1):
+                ibi_df = getattr(stud.ibi, term)
 
+                # fill table inter_beat_interval
+                for value_id, row in ibi_df.iterrows():
+                    cursor.execute(
+                        'INSERT INTO inter_beat_interval (student_id, term_id, ibi_value_id, ibi_value, timestamp) '
+                        'VALUES (%s, %s, %s, %s, %s)', (last_id, j, value_id + 1, int(row[1]), int(row[0]))
+                    )
+                db.commit()
 
+                # process data
+                duration = round((ibi_df.time.iloc[-1] - ibi_df.time.iloc[0]) / 3600, 2)  # recording duration in hours
+                ibi_array = np.array(ibi_df.interval)
+                nni_mean, sdnn = calculate_hrv(ibi_array)
+                insert_into_master = (last_id, j, stud.grades[j - 1], float(nni_mean),
+                                      float(sdnn), len(ibi_array), float(duration))
 
+                # fill table master_data
+                cursor.execute('INSERT INTO master_data (student_id, term_id, grade, nni_mean, sdnn, '
+                               'number_of_ibi, duration_in_h) VALUES (%s, %s, %s, %s, %s, %s, %s)', insert_into_master)
+                db.commit()
 
-            print('!!!  OK   !!!')
+                window_generator = InterBeatInterval.moving_5min_window(ibi_df, term)
 
-            # TODO create inter_beat_interval table
-            # TODO calculate sdnn, mean_nnS
+                for k, window_dic in enumerate(window_generator, start=1):
+                    ibi_num = len(window_dic['intervals'])
+                    if ibi_num < 3:
+                        continue
+                    hrv_parameters = calculate_hrv(window_dic['intervals'])
 
-            # TODO create master_data table
+                    for par_id, value in enumerate(hrv_parameters, start=1):
+                        # fill table window_values
+                        cursor.execute('INSERT INTO window_values (student_id, term_id, window_id, timestamp, '
+                                       'parameter_id, hrv_value, number_of_ibi) VALUES ( %s, %s, %s, %s, %s, %s, %s)',
+                                       (last_id, j, k, int(window_dic['time']), par_id, float(value), ibi_num))
 
-            # TODO use static funtion-generator to yield moving window in for-loop
-                # TODO calculate sdnn and mean_nn
-                # TODO write window_values table
-
-            db.commit()  # NOTE: LAST LINE OF CODE
+            db.commit()
 
 
 if __name__ == '__main__':
@@ -206,7 +256,6 @@ if __name__ == '__main__':
     # directory = input()
     path = os.path.join(directory, FILENAME+'.zip')
 
+    # TODO: handle duplicate entry
     create_schema(schema)
     unzip_data(path, process_data)
-
-
