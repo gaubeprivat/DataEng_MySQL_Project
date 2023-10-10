@@ -13,6 +13,7 @@ from contextlib import contextmanager
 
 import mysql.connector
 
+schema = 'application_project_gaube'
 
 @contextmanager
 def connect_to_localhost(database=None):
@@ -67,8 +68,24 @@ def create_schema(schema_name: str):
     with connect_to_localhost() as db:
 
         cursor = db.cursor()
+        cursor.execute(f'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "{schema}"')
 
-        cursor.execute(f'CREATE DATABASE IF NOT EXISTS {schema_name}')
+        if cursor.fetchone():
+            print(f'Schema {schema} already exists.')
+            while True:
+                user_input = input('Do you want to delete it? (y/n): ')
+
+                if user_input.lower() == 'y':
+                    cursor.execute(f"DROP DATABASE {schema}")
+                    print(f"Schema {schema} deleted successfully.")
+                    break
+                elif user_input.lower() == 'n':
+                    return
+
+                else:
+                    print('invalid input..')
+
+        cursor.execute(f'CREATE DATABASE {schema_name}') #IF NOT EXISTS
         cursor.execute(f'USE {schema_name}')
 
         cursor.execute('''
@@ -114,6 +131,7 @@ def create_schema(schema_name: str):
             nni_mean FLOAT,
             sdnn FLOAT,
             number_of_ibi INT,
+            duration_in_h FLOAT,
             FOREIGN KEY (student_id) REFERENCES dataset(id) ON DELETE CASCADE,
             FOREIGN KEY (term_id) REFERENCES exam(id)                    
         )
@@ -124,11 +142,11 @@ def create_schema(schema_name: str):
             id INT AUTO_INCREMENT PRIMARY KEY,
             student_id INT,
             term_id INT,
-            parameter_id INT,
-            parameter VARCHAR(15),
-            hrv_value_id INT,
-            hrv_value FLOAT,
+            window_id INT,
             timestamp INT,
+            parameter_id INT,
+            hrv_value FLOAT,
+            number_of_ibi INT,
             FOREIGN KEY (student_id) REFERENCES dataset(id) ON DELETE CASCADE,
             FOREIGN KEY (term_id) REFERENCES exam(id),
             FOREIGN KEY (parameter_id) REFERENCES hrv(id)
@@ -145,4 +163,4 @@ def create_schema(schema_name: str):
 
 
 if __name__ == '__main__':
-    create_schema('application_project_gaube')  # hardcoded
+    create_schema(schema)
