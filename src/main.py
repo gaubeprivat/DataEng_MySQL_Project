@@ -60,7 +60,6 @@ def clear():
 
 
 def unzip_it(zip_path: str, extract_to: str) -> None:
-
     """
     Extracts the contents of a zip file to a specified location.
 
@@ -101,14 +100,16 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
             print('Successfully unpacked outer zip-File')
 
             inner_zip_path = os.path.join(temp_dir, FILENAME, 'Data.zip')
-            unzip_it(inner_zip_path, temp_dir)
+            unzip_it(inner_zip_path, os.path.join(temp_dir, FILENAME))
             print('Successfully unpacked inner zip-File')
 
             if func is not None:
-                func(os.path.join(temp_dir))
+                func(os.path.join(temp_dir, FILENAME))
 
         except FileNotFoundError:
             print(f'invalid path given: {main_zip_path}. Code has not executed.')
+            raise
+
 
 
 def generator_length(temp_dir: str) -> int:
@@ -127,7 +128,7 @@ def student_factory(temp_dir: str) -> Generator[Student, None, None]:
     """
 
     students_list = os.listdir(os.path.join(temp_dir, 'Data'))
-    students_grades = Student.extract_grades(os.path.join(temp_dir, FILENAME, 'StudentGrades.txt'))
+    students_grades = Student.extract_grades(os.path.join(temp_dir, 'StudentGrades.txt'))
     term_keys = [key for key in students_grades]
 
     for student_id in students_list:
@@ -181,7 +182,7 @@ def process_data(temp_dir):
         print(f'Calculation to {round(i / expected_iterations * 100, 2)}% completed.')
         time_per_ds = 'unknown' if i < 2 else (timeit.default_timer() - start_t) / i
         if i >= 2:
-            print(f'predicted tim: {round((time_per_ds * (expected_iterations - i)) / 60, 2)} min') # TODO output doesent make sense for now
+            print(f'estimated time remaining: {round((time_per_ds * (expected_iterations - i)) / 60, 2)} min')
         print(f'{error_count} errors occurred')
         
         # open database connection with context manager
@@ -265,6 +266,5 @@ if __name__ == '__main__':
     # directory = input()
     path = os.path.join(directory, FILENAME+'.zip')
 
-    # TODO: handle duplicate entry
     create_schema(schema)
     unzip_data(path, process_data)
