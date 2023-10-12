@@ -1,12 +1,18 @@
 """
-Modul: sql_database
-Author: Benjamin Gaube
-Date: 2023-10-09
-"""  # TODO
+SQL Database Interaction Module
+-------------------------------
 
-# check if there is already a schema/database
-# if yes - ask if it realy shall be overwritten "tip y/n"
-# y -> overwrite / n -> raise Error and catch it in main to finish without processing
+This module provides functionalities for interaction with a MySQL database,
+including schema creation and basic CRUD operations through various functions
+and context managers.
+
+Usage:
+    Make sure that there is a MySQL-Server running at local host.
+
+:Modul: sql_database
+:Author: Benjamin Gaube
+:Date: 2023-10-12
+"""
 
 from time import sleep
 from contextlib import contextmanager
@@ -14,6 +20,7 @@ from contextlib import contextmanager
 import mysql.connector
 
 schema = 'application_project_gaube'
+
 
 @contextmanager
 def connect_to_localhost(database=None):
@@ -61,9 +68,15 @@ def connect_to_localhost(database=None):
 
 def create_schema(schema_name: str):
     """
-    
-    
-    """ # TODO
+    Creates a database schema if it does not exist, with optional deletion of existing schema.
+
+    Connects to a local database, checks if a schema by the provided name already exists,
+    and if so, prompts the user to either delete or retain it. If the user opts for deletion,
+    the existing schema is dropped. Subsequently or if the schema didn't exist in the first place,
+    the function creates a new schema and sets up a basic table structure within it.
+
+    :param schema_name: str, The name of the schema to be created in the database.
+    """
 
     with connect_to_localhost() as db:
 
@@ -85,7 +98,7 @@ def create_schema(schema_name: str):
                 else:
                     print('invalid input..')
 
-        cursor.execute(f'CREATE DATABASE {schema_name}') #IF NOT EXISTS
+        cursor.execute(f'CREATE DATABASE {schema_name}')
         cursor.execute(f'USE {schema_name}')
 
         cursor.execute('''
