@@ -16,5 +16,5 @@ Fuer die Nutzung des Codes wird eine laufende MySQL Datenbank auf dem localhost 
 Das Ergebnis kann mit einem beliebigien Datenbank Verwaltungstool eingesehen werden. Beispielsweise kann die OpenSource Software HeidiSQL genutzt werden(https://www.heidisql.com/download.php). Das hard gecodete Schema ist 'application_project_gaube'.
 
 
-
+## Literaturnachweis
 Amin, M. R., Wickramasuriya, D., & Faghih, R. T. (2022). A Wearable Exam Stress Dataset for Predicting Cognitive Performance in Real-World Settings (version 1.0.0). PhysioNet. https://doi.org/10.13026/kvkb-aj90
