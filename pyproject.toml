@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel", "python>=3.8.6"]
+
+[project]
+name = "application_project"
+version = "0.1.0"
+description = "Personal project for application rasons: 
+               Demonstrating data processing and use of mysql Database.
+               Data available on https://www.physionet.org/content/wearable-exam-stress/1.0.0/"
+readme = "README.md"
+authors = [
+    {name = "Benjamin Gaube", email = "b_gaube@gmx.de"}
+]
+license = "MIT"
+dependencies = [
+    "pandas>=2.0.3",
+    "numpy>=1.24.3",
+    "mysql-connector>=2.2.9"
+]
