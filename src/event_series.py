@@ -1,19 +1,39 @@
 """
-Modul: event_series
-Author: Benjamin Gaube
-Date: 2023-10-08
+EventSeries Module
+-------------------
 
-providing ibi-object and functionality to process
-"""  # TODO
+The `ibi` module provides functionalities to manage IBI data of students across different
+term periods such as 'Final', 'Midterm 1', and 'Midterm 2'. It allows reading of IBI data
+from CSV files, and offers utilities for reformatting and generating 5-minute moving windows
+of IBI data within specified term periods. These periods are hardcoded in the class attribute
+`term_periods`.
+
+:Modul: event_series
+:Author: Benjamin Gaube
+:Date: 2023-10-12
+"""
 
 import os
 
 import pandas as pd
 import numpy as np
-from typing import Generator, Tuple
+from typing import Generator, Dict
 
 
 class InterBeatInterval:
+    """
+    Manage and provide access to Inter-Beat Interval (IBI) data for different term periods.
+
+    The class provides functionalities for reading, reformating and generating
+    5-minute moving windows of IBI data for different term periods (e.g., 'Final', 'Midterm 1', 'Midterm 2').
+
+    :ivar path: str, The directory path where term IBI data resides.
+    :ivar final: pd.DataFrame, A DataFrame containing the 'Final' term IBI data.
+    :ivar mid1: pd.DataFrame, A DataFrame containing the 'Midterm 1' term IBI data.
+    :ivar mid2: pd.DataFrame, A DataFrame containing the 'Midterm 2' term IBI data.
+
+    :param temp_dir: str, Temporary directory path where IBI data for different term periods are stored.
+    """
 
     term_periods = {'final': (1544022000, 1544032800),
                     'mid1': (1539439200, 1539444600),
@@ -25,13 +45,20 @@ class InterBeatInterval:
         self.mid1 = self.read_file('Midterm 1')
         self.mid2 = self.read_file('Midterm 2')
 
-    def read_file(self, term: str):  # notation return pandas df
+    def read_file(self, term: str) -> pd.DataFrame:
+        """
+        Read and return IBI data for a specified term period from CSV file.
+
+        :param term: str, The term period for which IBI data is to be read.
+            Should be one of {'Final', 'Midterm 1', 'Midterm 2'}.
+        :return: pd.DataFrame, DataFrame containing IBI data for the specified term period.
+        """
         ibi_df = pd.read_csv(os.path.join(self.path, term, 'IBI.csv'), encoding='utf-8-sig')
         ibi_df = self._reformat_file(ibi_df)
         return ibi_df
 
     @staticmethod
-    def moving_5min_window(ibi_df: pd.DataFrame, term: str) -> Generator[Tuple[int, int, np.array], None, None]:
+    def moving_5min_window(ibi_df: pd.DataFrame, term: str) -> Generator[Dict[int, np.array], None, None]:
         """
         Generate 5-minute moving windows of inter-beat interval (IBI) data across a specified term.
 
@@ -62,8 +89,7 @@ class InterBeatInterval:
             stop = timestamp + 150  # plus 2.5min
             window = ibi_df.query('@start <= time <= @stop')
 
-            yield timestamp, len(window), np.array(window.interval)
-
+            yield {'time': timestamp, 'intervals': np.array(window.interval)}
 
     @staticmethod
     def _reformat_file(ibi_df: pd.DataFrame) -> pd.DataFrame:
