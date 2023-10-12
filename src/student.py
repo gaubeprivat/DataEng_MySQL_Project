@@ -1,24 +1,39 @@
 """
+Student Module
+-------------------------------------------
+
+This module provides the Student object which stores the Student ID, the temporary
+path, information about the grades per term and on event_series object which provides
+further information about the HRV and some functionality.
+
+The static methode provides functionality to get the grades from a specific txt-file.
+
 Modul: student
 Author: Benjamin Gaube
-Date: 2023-10-07
-
-Modul provides the student-object from the zip-file
-"""  # TODO
+Date: 2023-10-12
+"""
 
 
 import os
 import re
-from typing import Dict  # List, Tuple, Any, Callable
+from typing import Dict
 
 from src.event_series import InterBeatInterval
 
 
 class Student:
     """
-    
+    Represents a student and manages associated data and functionality.
+
+    The Student class provides functionality to handle a student's data which
+    includes student identification, grades, and physiological data (IBI). Methods
+    for extracting grade information and handling IBI data are included.
+
+    :ivar path: str, Absolute path to the student's data directory.
+    :ivar student_id: str, A unique identifier for the student.
+    :ivar grades: dict, Nested dictionary containing the student's grade information.
+    :ivar _ibi: InterBeatInterval or None, An object that stores and manages the student's IBI data.
     """
-    # TODO docstring
 
     def __init__(self, temp_path, student_id, grades):
         self.path = os.path.join(temp_path, student_id)
@@ -27,11 +42,22 @@ class Student:
         self._ibi = None
 
     @property
-    def ibi(self):
+    def ibi(self) -> InterBeatInterval:
+        """
+        Accessor for the '_ibi' attribute to safely access the IBI object.
+
+        :return: InterBeatInterval, The IBI object associated with the student.
+        """
         return self._ibi
 
     @ibi.setter
     def ibi(self, temp_dir):
+        """
+        Setter for the '_ibi' attribute to initialize the IBI object.
+
+        :param temp_dir: str, Directory containing the IBI data.
+        :raise FileNotFoundError: If required IBI data folders are not found.
+        """
 
         check_content = ['Final', 'Midterm 1', 'Midterm 2']
 
