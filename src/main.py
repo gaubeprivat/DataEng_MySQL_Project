@@ -21,9 +21,13 @@ Main Functions:
                     and store them into the database
 
 Usage:
+    The used Data is free access and available on `https://www.physionet.org/content/wearable-exam-stress/1.0.0/`.
+    The path to the downloaded zip-file hase to be hardcoded in the variable `directory`
+    or alternatively the zip-file has to be in the directory `C:\tests`.
 
-xamp, link data, pfad hardcoden
-
+    A local MySQl server has to run. For this purpose I used XAMPP (https://www.apachefriends.org/de/index.html)
+    with the default Settings (localhost Port `3306`, no password and user `root`).
+    The necessary schema will automatically be created while running this code.
 
 Contained Modules:
 - `student.py`: Provides a student-object with all necessary information.
@@ -32,8 +36,8 @@ Contained Modules:
                      for the connection to localhost.
 
 :Author: Benjamin Gaube
-:Date: 2023-10-10
-"""  # TODO Usage
+:Date: 2023-10-12
+"""
 
 
 import os
@@ -50,7 +54,7 @@ from src.student import Student
 from src.sql_database import create_schema, connect_to_localhost
 from src.event_series import InterBeatInterval
 
-directory = r'C:\tests'  # TODO
+directory = r'C:\tests'  # TODO Enter the path to the downloaded zip-File here.
 schema = 'application_project_gaube'
 FILENAME = r'a-wearable-exam-stress-dataset-for-predicting-cognitive-performance-in-real-world-settings-1.0.0'
 
@@ -111,7 +115,6 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
             raise
 
 
-
 def generator_length(temp_dir: str) -> int:
     return len(os.listdir(os.path.join(temp_dir, 'Data')))
 
@@ -153,16 +156,19 @@ def calculate_hrv(hrv_array: np.array) -> Tuple[float, float]:
     calculate frequency-based parameters (e.g., High Frequency - Low Frequency Ratio).
     Furthermore, evaluating persistence with Detrended Fluctuation Analysis or other
     nonlinear methods will not lead to consistent data.
+
+    :param hrv_array: np.array, Array containing inter beat intervals.
+    :yield: tuple(float, float), Returning the mean nni and the SDNN.
     """
 
     return np.mean(hrv_array).round(2), np.std(hrv_array, ddof=0).round(2)
 
 
-def process_data(temp_dir):
+def process_data(temp_dir: str):
     """
+    Process student and HRV data from a ZIP file and store structured Data into an SQL database.
 
-    .........calculate hrv for each student and store the values along with grades into db
-
+    :param temp_dir: str, The path to the temporary directory containing the data.
     """
 
     # TODO
