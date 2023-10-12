@@ -189,23 +189,31 @@ def process_data(temp_dir):
             cursor = db.cursor()
 
             try:
-                # if the student doesn't exist: write it into db
-                cursor.execute('INSERT INTO dataset (student) VALUES (%s)', (stud.student_id,))
-                cursor.execute('SELECT LAST_INSERT_ID()')
-                last_id = cursor.fetchone()[0]
-            except mysql.connector.IntegrityError as e:
-                # if the student already in db: delete old entry, write..
-                if 'Duplicate entry' in str(e):
-                    print(f'Duplicate entry {stud.student_id} for key student detected. Deleting...')
-                    cursor.execute(f"DELETE FROM dataset WHERE student = '{stud.student_id}'")
-                    db.commit()
-                    cursor.execute('INSERT INTO dataset (student) VALUES (%s, %s)', (stud.student_id,))
-
+                # add student to db
+                try:
+                    # if the student doesn't exist: write student
+                    cursor.execute('INSERT INTO dataset (student) VALUES (%s)', (stud.student_id,))
                     cursor.execute('SELECT LAST_INSERT_ID()')
                     last_id = cursor.fetchone()[0]
-                else:
-                    raise  # TODO Some Error here...
-                    # TODO: maybe outer try - except statement --> write log and continue with next student
+                except mysql.connector.IntegrityError as e:
+                    # if the student already in db: rewrite student
+                    if 'Duplicate entry' in str(e):
+                        print(f'Duplicate entry {stud.student_id} for key student detected. Deleting...')
+                        cursor.execute(f"DELETE FROM dataset WHERE student = '{stud.student_id}'")
+                        db.commit()
+                        print(f'Successfully deleted {stud.student_id}. Rewriting...')
+                        cursor.execute('INSERT INTO dataset (student) VALUES (%s)', (stud.student_id,))
+
+                        cursor.execute('SELECT LAST_INSERT_ID()')
+                        last_id = cursor.fetchone()[0]
+                    else:
+                        raise
+            except Exception as e:
+                with open(os.path.join(directory, 'error_log.txt'), 'a') as file:
+                    error_time = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    file.write(f'Error in {stud.student_id} at {error_time}:\n {e}')
+                    file.write('\n\n')
+                continue
 
             # set ibi object for student
             stud.ibi = stud.path
@@ -248,6 +256,7 @@ def process_data(temp_dir):
                                        'parameter_id, hrv_value, number_of_ibi) VALUES ( %s, %s, %s, %s, %s, %s, %s)',
                                        (last_id, j, k, int(window_dic['time']), par_id, float(value), ibi_num))
 
+                db.commit()
             db.commit()
 
 
