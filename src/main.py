@@ -116,6 +116,12 @@ def unzip_data(main_zip_path: str, func: callable = None) -> None:
 
 
 def generator_length(temp_dir: str) -> int:
+    """
+    Get the length of the generator object provided by student_factory().
+
+    :param temp_dir: str, The path to the temporary directory containing the data.
+    :return: int, Length of the generator.
+    """
     return len(os.listdir(os.path.join(temp_dir, 'Data')))
 
 
