@@ -8,9 +8,9 @@ further information about the HRV and some functionality.
 
 The static methode provides functionality to get the grades from a specific txt-file.
 
-Modul: student
-Author: Benjamin Gaube
-Date: 2023-10-12
+:Modul: student
+:Author: Benjamin Gaube
+:Date: 2023-10-12
 """
 
 
