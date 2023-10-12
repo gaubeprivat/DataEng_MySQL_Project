@@ -1,13 +1,27 @@
 """
-Modul: test_main
-Author: Benjamin Gaube
-Date: 2023-10-08
+Tests for Main Module
+----------------------
 
-Info:
-    These tests primarily are a showcase to demonstrate awareness of testdriven development.
-    There will be no full test-coverage for this project.
+Tests in this project primarily are a showcase to demonstrate awareness of testdriven development.
+But they were also used along the development of the basic functionality, to work around
+unpacking. I know, that 'data mocking' could be an opportunity, but for now this approach
+should work. Because this should primarily a showcase, there is no full test-coverage for
+this project.
 
-    For usage please hardcode the [main_zip_path] in class TestModul with the directory were ur zip-file is located.
+Usage:
+    For usage the directory were ur zip-file is located has to be given. Please hardcode the
+    [main_zip_path] in class TestModul. The Test-Code is structured in a way that the
+    zip-File (as it is downloaded from the given website) is permanently unpacked in the
+    given path and could be used in these tests. There will no interaction with a database
+    in the tests of test_event_series.py, test_student.py and test_main.py, so there is no
+    need to run one.
+
+Data download:
+    https://www.physionet.org/content/wearable-exam-stress/1.0.0/
+
+:Modul: test_main
+:Author: Benjamin Gaube
+:Date: 2023-10-12
 """
 
 import os
@@ -20,7 +34,7 @@ from src.main import unzip_data, unzip_it, generator_length, student_factory, FI
 
 class TestModul(unittest.TestCase):
 
-    main_zip_path = r'C:\tests'  # TODO: enter the folder path of the zip-file here
+    main_zip_path = r'C:\tests'  # TODO: enter the folder path to the zip-file here
 
     def setUp(self):
         """ define the setUp outside the class, to use it in multiple test_moduls"""
@@ -70,6 +84,7 @@ class TestMainModul(TestModul):
     def test_student_factory(self):  # tests for class Student in test_student.py
         students_list = []
         students_list_validate = ['S1', 'S3', 'S5', 'S7', 'S10']
+
         for stud in student_factory(os.path.join(self.unpacked_directory)):  # self.unpacked_directory
             students_list.append(stud.student_id)
 

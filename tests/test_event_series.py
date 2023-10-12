@@ -1,10 +1,11 @@
 """
-Modul: test_event_series
-Author: Benjamin Gaube
-Date: 2023-10-08
+Tests for EventSeries Module
+----------------------
+For further Information see Docstring in test_main.py
 
-For usage please hardcode the [main_zip_path] in class TestModul (test_main.py)
-with the directory were ur zip-file is located.
+:Modul: test_event_series
+:Author: Benjamin Gaube
+:Date: 2023-10-12
 """
 
 import os

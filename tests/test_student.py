@@ -1,10 +1,11 @@
 """
-Modul: test_student
-Author: Benjamin Gaube
-Date: 2023-10-08
+Tests for Student Module
+----------------------
+For further Information see Docstring in test_main.py
 
-For usage please hardcode the [main_zip_path] in class TestModul (test_main.py)
-with the directory were ur zip-file is located.
+:Modul: test_student
+:Author: Benjamin Gaube
+:Date: 2023-10-12
 """
 
 import os
@@ -65,7 +66,7 @@ class TestStudentModul(TestModul):
         self.assertEqual(some_other_student.grades[1], 33)
 
     def test_getter_setter(self):
-        # NOTE: the constructor of event_series should work correctly.
+        # NOTE: For use the constructor of event_series should work correctly.
         # Check 'test_constructor' in 'test_event_series.py'
 
         some_student = Student(self.students_directory, 'S1', TestStudentModul.personal_grades('S1'))
