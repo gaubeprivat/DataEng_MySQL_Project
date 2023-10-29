@@ -5,6 +5,7 @@ Dieses Projekt zeigt an einem Beispiel Grundlegende Programmierpraxis und Versta
 Es wurde fuer eine MySQL Datenbank ein Schema desigend, das speziell auf die Daten von Amin et al. (2022) abgestimmt ist, welche ueber physionet.org frei zugaenglich sind.
 Entsprechend meiner Vorerfahrungen aus der Masterarbeit handelt es sich bei diesen Beispieldatensatz um physiologische Signale und Eventserien. Speziell wird die Herzratenvariabilitaet (HRV) verarbeitet, welche fuer Studierende waehrend drei verschiedener Pruefungen erhoben wurden.
 Neben der Datenverarbeitung und Datenbankerstellung wird testdriven developement und der Umgang mit git an diesem Beispielprojekt demonstriert.
+Eine kure Datenanalyse wird im beiliegenden JupyterNotebook zu demonstrationszwecken durchgefuehrt.
 
 ## Datengrundlage
 Die Daten sind ueber https://www.physionet.org/content/wearable-exam-stress/1.0.0/ frei zugaenglich. Die gedownloadete zip-Date darf fuer die Nutzung des Codes nicht umbenannt und nicht entpackt werden. 
