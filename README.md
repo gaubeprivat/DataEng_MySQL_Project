@@ -1,21 +1,23 @@
-# Beispielprojekt zu Bewerbungszwecken
+# Using open Soucre Data and Tools to demonstrate SQL and Data Engineering Skills
 
-## Kurzbeschreibung
-Dieses Projekt zeigt an einem Beispiel Grundlegende Programmierpraxis und Verstaendnis von Softwareentwicklung im Kontext der Datenverarbeitung.
-Es wurde fuer eine MySQL Datenbank ein Schema desigend, das speziell auf die Daten von Amin et al. (2022) abgestimmt ist, welche ueber physionet.org frei zugaenglich sind.
-Entsprechend meiner Vorerfahrungen aus der Masterarbeit handelt es sich bei diesen Beispieldatensatz um physiologische Signale und Eventserien. Speziell wird die Herzratenvariabilitaet (HRV) verarbeitet, welche fuer Studierende waehrend drei verschiedener Pruefungen erhoben wurden.
-Neben der Datenverarbeitung und Datenbankerstellung wird testdriven developement und der Umgang mit git an diesem Beispielprojekt demonstriert.
-Eine kure Datenanalyse wird im beiliegenden JupyterNotebook zu demonstrationszwecken durchgefuehrt.
+## Summary
+This project is not solely about "problem-solving" but aims to demonstrate fundamental programming practices and concepts, as well as an understanding of software development in the context of data processing, using an example. Therefore, the zip file is treated as if data in this exact format will repeatedly be provided, which will be transferred to a database using the Python script.
 
-## Datengrundlage
-Die Daten sind ueber https://www.physionet.org/content/wearable-exam-stress/1.0.0/ frei zugaenglich. Die gedownloadete zip-Date darf fuer die Nutzung des Codes nicht umbenannt und nicht entpackt werden. 
-Die zip-Datei ist entweder unter 'C:\tests' abzulegen oder der Pfad zur zip-Datei hard zu coden (siehe TODO).
+A schema was designed for a MySQL database, specifically tailored to the data from Amin et al. (2022), which is freely accessible via physionet.org. Based on my prior experience from my master's thesis, this sample dataset consists of physiological signals and event series. Specifically, heart rate variability (HRV) data collected from students during three different exams is processed.
 
-## Datenbankanbindung
-Fuer die Nutzung des Codes wird eine laufende MySQL Datenbank auf dem localhost vorausgesetzt. XAMPP stellt eine einfache Moeglichkeit zum hosten eines passenden Servers (MariaDB) bereit: https://www.apachefriends.org/de/index.html
-
-Das Ergebnis kann mit einem beliebigien Datenbank Verwaltungstool eingesehen werden. Beispielsweise kann die OpenSource Software HeidiSQL genutzt werden(https://www.heidisql.com/download.php). Das hard gecodete Schema ist 'application_project_gaube'.
+In addition to data processing and database creation, test-driven development and the use of Git are demonstrated through this example project. A brief data query and processing are conducted in the accompanying Jupyter Notebook for demonstration purposes.
 
 
-## Literaturnachweis
+## Data
+The data is freely accessible via https://www.physionet.org/content/wearable-exam-stress/1.0.0/. he downloaded zip file must not be renamed or unpacked for the use of the code. The zip file should either be placed under 'C:\tests' or the path to the zip file should be hardcoded (see TODO).
+
+## Database
+For using the code, a running MySQL database on the localhost is required. XAMPP provides an easy way to host a suitable server (MariaDB): https://www.apachefriends.org/de/index.html
+
+DSure, here is the translation:
+
+The result can be viewed with any database management tool. For example, the open-source software HeidiSQL can be used  (https://www.heidisql.com/download.php). The hard-coded schema is 'application_project_gaube'.
+
+
+## References
 Amin, M. R., Wickramasuriya, D., & Faghih, R. T. (2022). A Wearable Exam Stress Dataset for Predicting Cognitive Performance in Real-World Settings (version 1.0.0). PhysioNet. https://doi.org/10.13026/kvkb-aj90
